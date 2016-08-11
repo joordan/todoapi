@@ -1,19 +1,12 @@
 var express = require('express');
+var bodyParser = require('body-parser');
+
 var app = express();
 var PORT = process.env.PORT || 3000;
-var todos = [{							// collection
-	id: 1,								// this is 
-	description: 'catch some mon',		// a
-	completed: false					// module
-},{
-	id: 2,								// this is
-	description: 'even more mon',		// another
-	completed: false					// module
-},{
-	id: 3,
-	description: 'train some mon',
-	completed: true
-}];
+var todos = [];
+var todoNextId = 1; // to identify unique items, not secure, use database instead
+
+app.use(bodyParser.json()); // json request are parsed by express, able to access by request.body
 
 app.get('/', function (request,response) {
 	response.send('to do api root');
@@ -30,7 +23,7 @@ app.get('/todos/:id', function (request,response) {		//:id whatever user puts in
 	var todoId = parseInt(request.params.id,10);		// store whatever user put in to use for  
 	var matchedTodo;									//searching parse int for str to int conversion
 
-	todos.forEach(function (todo) { 	//anonymous function called for each ithem 
+	todos.forEach(function (todo) { 	//anonymous function called for each item or module
 		if (todoId === todo.id) {
 			matchedTodo = todo;
 		}
@@ -42,10 +35,26 @@ app.get('/todos/:id', function (request,response) {		//:id whatever user puts in
 		response.status(404).send();
 	}
 
-
-
-	//response.send('asking for todo with id of ' + request.params.id)
+//response.send('asking for todo with id of ' + request.params.id)
 });
+
+
+// POST /todos access data sent by request by using npmmodule bodyparser
+app.post('/todos', function (request,response) {
+	var body = request.body;
+
+	// add id field
+	body.id = todoNextId++;
+
+	//push body into array
+	todos.push(body);
+
+	// console.log('description: ' + body.description );
+	response.json(body);
+});
+
+
+
 
 app.listen(PORT, function() {
 	console.log('Express listening on port ' + PORT + '!');
