@@ -1,14 +1,14 @@
 var express = require('express');
 var app = express();
 var PORT = process.env.PORT || 3000;
-var todos = [{
-	id: 1,
-	description: 'catch some mon',
-	completed: false
+var todos = [{							// collection
+	id: 1,								// this is 
+	description: 'catch some mon',		// a
+	completed: false					// module
 },{
-	id: 2,
-	description: 'even more mon',
-	completed: false
+	id: 2,								// this is
+	description: 'even more mon',		// another
+	completed: false					// module
 },{
 	id: 3,
 	description: 'train some mon',
@@ -26,14 +26,25 @@ app.get('/todos', function (request,response) {
 });
 
 // GET /todos/:id
-app.get('/todos/:id', function (request,response) {
-	var todoId = request.params.id;
+app.get('/todos/:id', function (request,response) {		//:id whatever user puts in
+	var todoId = parseInt(request.params.id,10);		// store whatever user put in to use for  
+	var matchedTodo;									//searching parse int for str to int conversion
 
-	//iterate over todo array. find the match
-	response.status(404).send();
+	todos.forEach(function (todo) { 	//anonymous function called for each ithem 
+		if (todoId === todo.id) {
+			matchedTodo = todo;
+		}
+	}); 	
+
+	if (matchedTodo) {
+		response.json(matchedTodo);
+	} else {
+		response.status(404).send();
+	}
 
 
-	response.send('asking for todo with id of ' + request.params.id)
+
+	//response.send('asking for todo with id of ' + request.params.id)
 });
 
 app.listen(PORT, function() {
