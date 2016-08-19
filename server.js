@@ -108,8 +108,10 @@ app.put('/todos/:id', function (request, response) {
 		}
 
 		//if it exist, it meets standards for completed
+
 		if (body.hasOwnProperty('completed') && _.isBoolean(body.completed)) { //if property exist and its a boolean
 			validAttributes.completed = body.completed;
+
 		} else if (body.hasOwnProperty('completed')) {
 			// bad happened
 			return response.status(400).send();
@@ -126,7 +128,9 @@ app.put('/todos/:id', function (request, response) {
 
 		_.extend(matchedTodo, validAttributes);
 
+
 		response.json(matchedTodo);//automatically send back status 200
+
 		
 
 });
