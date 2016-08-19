@@ -14,20 +14,31 @@ app.get('/', function (request,response) {
 });
 
 
-// GET /todos?completed=true
+// GET /todos?completed=true&q=house
 app.get('/todos', function (request,response) {
 	var queryParams = request.query; // allows key/value parameters /todos?key=value&anotherkey=value
 	var filteredTodos = todos;
 
+	//query for completed
 	if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'true' ) {
 		filteredTodos = _.where(filteredTodos, {completed: true});
 	} else if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'false') {
 		filteredTodos = _.where(filteredTodos, {completed: false});
 	}
 
+	//query for seaching description
+	//go through each description if it contains the query parameter, return it
+
+	if (queryParams.hasOwnProperty('q') && queryParams.q.length > 0 ) {
+		filteredTodos = _.filter(filteredTodos, function (todo) { 
+			return todo.description.toLowerCase().indexOf(queryParams.q.toLowerCase()) > -1; //"go to work on a weeked".indexOf('work')
+		});
+	}
+
 	// if has property && completed === true
 	// filteredTodos = _.where(filteredTodos, ?)
 	// else if has prop && if completed if 'false'
+
 
 
 
