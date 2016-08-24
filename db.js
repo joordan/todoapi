@@ -3,10 +3,22 @@
 // exports db object, instance, and library
 
 var Sequelize = require('sequelize');
-var sequelize = new Sequelize(undefined, undefined, undefined, {
-	'dialect': 'sqlite',
-	'storage': __dirname + '/data/dev-todo-api.sqlite'
-}); // instance
+var env = process.env.NODE_ENV || 'development';  // access node_env in production
+var sequelize;
+
+if (env  === 'production') {
+	sequelize = new Sequelize(process.env.DATABASE_URL, {
+		dialect: 'postgres'
+	});
+} else {
+	sequelize = new Sequelize(undefined, undefined, undefined, {
+		'dialect': 'sqlite',
+		'storage': __dirname + '/data/dev-todo-api.sqlite'
+	}); // instance
+}
+
+
+
 
 var db = {}; //attach properties then export it from db.js
 
