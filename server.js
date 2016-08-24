@@ -55,9 +55,19 @@ app.get('/todos', function(request, response) {
 // GET /todos/:id
 app.get('/todos/:id', function(request, response) { //:id whatever user puts in
 	var todoId = parseInt(request.params.id, 10); // store whatever user put in to use for  
-	var matchedTodo = _.findWhere(todos, {
-		id: todoId
-	}); // _.findWhere underscore refactoring. commonly used code functions
+
+	db.todo.findById(todoId).then(function (todo) {
+		if (!!todo) {
+			response.json(todo.toJSON());
+		} else {
+			response.status(404).send();
+		}
+	}, function (e) {
+		response.status(500).send();
+	});
+	// var matchedTodo = _.findWhere(todos, {
+	// 	id: todoId
+	// }); // _.findWhere underscore refactoring. commonly used code functions
 
 	// var matchedTodo;									//searching parse int for str to int conversion
 
@@ -67,11 +77,11 @@ app.get('/todos/:id', function(request, response) { //:id whatever user puts in
 	// 	}
 	// }); 	
 
-	if (matchedTodo) {
-		response.json(matchedTodo);
-	} else {
-		response.status(404).send();
-	}
+	// if (matchedTodo) {
+	// 	response.json(matchedTodo);
+	// } else {
+	// 	response.status(404).send();
+	// }
 
 	//response.send('asking for todo with id of ' + request.params.id)
 });
