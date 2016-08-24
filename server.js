@@ -26,15 +26,17 @@ app.get('/todos', function(request, response) {
 		where.completed = false;
 	}
 
-	if (query.hasOwnProperty('q') && query.q.length > 0 ) {
+	if (query.hasOwnProperty('q') && query.q.length > 0) {
 		where.description = {
 			$like: '%' + query.q + '%'
 		};
 	}
 
-	db.todo.findAll({where: where}).then(function (todos) {
+	db.todo.findAll({
+		where: where
+	}).then(function(todos) {
 		response.json(todos);
-	}, function (e) {
+	}, function(e) {
 		response.status(500).send();
 	})
 
@@ -74,13 +76,13 @@ app.get('/todos', function(request, response) {
 app.get('/todos/:id', function(request, response) { //:id whatever user puts in
 	var todoId = parseInt(request.params.id, 10); // store whatever user put in to use for  
 
-	db.todo.findById(todoId).then(function (todo) {
+	db.todo.findById(todoId).then(function(todo) {
 		if (!!todo) {
 			response.json(todo.toJSON());
 		} else {
 			response.status(404).send();
 		}
-	}, function (e) {
+	}, function(e) {
 		response.status(500).send();
 	});
 	// var matchedTodo = _.findWhere(todos, {
@@ -109,9 +111,9 @@ app.get('/todos/:id', function(request, response) { //:id whatever user puts in
 app.post('/todos', function(request, response) {
 	var body = _.pick(request.body, 'description', 'completed'); //_.pick only allows certain key values to be taken from json
 
-	db.todo.create(body).then(function (todo) {
+	db.todo.create(body).then(function(todo) {
 		response.json(todo.toJSON());
-	}, function (e) {
+	}, function(e) {
 		response.status(400).json(e);
 	});
 
@@ -138,14 +140,14 @@ app.post('/todos', function(request, response) {
 // DELETE /todos/:id
 
 app.delete('/todos/:id', function(request, response) {
-	var todoId = parseInt(request.params.id,10);
+	var todoId = parseInt(request.params.id, 10);
 
 
 	db.todo.destroy({
 		where: {
 			id: todoId
 		}
-	}).then(function (rowsDeleted) {
+	}).then(function(rowsDeleted) {
 		if (rowsDeleted === 0) {
 			response.status(404).json({
 				error: 'No todo with id'
@@ -153,7 +155,7 @@ app.delete('/todos/:id', function(request, response) {
 		} else {
 			response.status(204).send(); // 200 expect something sent back 204 nothing sent back
 		}
-	}, function () {
+	}, function() {
 		response.status(500).send();
 	});
 	// var matchedTodo = _.findWhere(todos, {
@@ -174,42 +176,38 @@ app.delete('/todos/:id', function(request, response) {
 // PUT /todos/:id
 app.put('/todos/:id', function(request, response) {
 	var todoId = parseInt(request.params.id, 10);
-	var matchedTodo = _.findWhere(todos, {
-		id: todoId
-	});
-	var body = _.pick(request.body, 'description', 'completed'); //filter with _.pick only allows certain key values to be taken from json
-	var validAttributes = {};
+	// var matchedTodo = _.findWhere(todos, {
+	// 	id: todoId
+	// });
+	var body = _.pick(request.body, 'description', 'completed'); //filter with _.pick only allows certain key values to be taken 
+	var attributes = {};
 
-	if (!matchedTodo) {
-		return response.status(404).send();
-	}
+
 
 	//if it exist, it meets standards for completed
 
-	if (body.hasOwnProperty('completed') && _.isBoolean(body.completed)) { //if property exist and its a boolean
-		validAttributes.completed = body.completed;
-
-	} else if (body.hasOwnProperty('completed')) {
-		// bad happened
-		return response.status(400).send();
+	if (body.hasOwnProperty('completed')) { //if property exist and its a boolean
+		attributes.completed = body.completed;
 	}
 
 	//if it exist, description
-	if (body.hasOwnProperty('description') && _.isString(body.description) && body.description.trim().length > 0) {
-		validAttributes.description = body.description;
-	} else if (body.hasOwnProperty('description')) {
-		return response.status(400).send();
+	if (body.hasOwnProperty('description')) {
+		attributes.description = body.description;
 	}
 
-	// things went right
-
-	_.extend(matchedTodo, validAttributes);
-
-
-	response.json(matchedTodo); //automatically send back status 200
-
-
-
+	db.todo.findById(todoId).then(function(todo) {
+		if (todo) { //find
+			todo.update(attributes).then(function(todo) {
+				response.json(todo.toJSON()); //update goes well
+			}, function(e) {
+				response.status(400).json(e); //update goes wrong
+			});
+		} else { //by
+			response.status(404).send();
+		} //id
+	}, function() {
+		response.status(500).send(); //run if findbyid went wrong
+	});
 });
 
 db.sequelize.sync().then(function() {
@@ -217,4 +215,3 @@ db.sequelize.sync().then(function() {
 		console.log('Express listening on port ' + PORT + '!');
 	});
 });
-
