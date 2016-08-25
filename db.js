@@ -25,6 +25,7 @@ var db = {}; //attach properties then export it from db.js
 
 // sequelize call load in modules from separate files
 db.todo = sequelize.import(__dirname + '/models/todo.js');
+db.user = sequelize.import(__dirname + '/models/users.js')
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 

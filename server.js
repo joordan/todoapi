@@ -40,35 +40,6 @@ app.get('/todos', function(request, response) {
 		response.status(500).send();
 	})
 
-	// long because of filtering
-	//var filteredTodos = todos;
-
-	// //query for completed
-	// if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'true') {
-	// 	filteredTodos = _.where(filteredTodos, {
-	// 		completed: true
-	// 	});
-	// } else if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'false') {
-	// 	filteredTodos = _.where(filteredTodos, {
-	// 		completed: false
-	// 	});
-	// }
-
-	//query for seaching description
-	//go through each description if it contains the query parameter, return it
-
-	// if (queryParams.hasOwnProperty('q') && queryParams.q.length > 0) {
-	// 	filteredTodos = _.filter(filteredTodos, function(todo) {
-	// 		return todo.description.toLowerCase().indexOf(queryParams.q.toLowerCase()) > -1; //"go to work on a weeked".indexOf('work')
-	// 	});
-	// }
-
-	// if has property && completed === true
-	// filteredTodos = _.where(filteredTodos, ?)
-	// else if has prop && if completed if 'false'
-
-	// response.json(filteredTodos);
-
 
 });
 
@@ -85,25 +56,6 @@ app.get('/todos/:id', function(request, response) { //:id whatever user puts in
 	}, function(e) {
 		response.status(500).send();
 	});
-	// var matchedTodo = _.findWhere(todos, {
-	// 	id: todoId
-	// }); // _.findWhere underscore refactoring. commonly used code functions
-
-	// var matchedTodo;									//searching parse int for str to int conversion
-
-	// todos.forEach(function (todo) { 	//anonymous function called for each item or module
-	// 	if (todoId === todo.id) {
-	// 		matchedTodo = todo;
-	// 	}
-	// }); 	
-
-	// if (matchedTodo) {
-	// 	response.json(matchedTodo);
-	// } else {
-	// 	response.status(404).send();
-	// }
-
-	//response.send('asking for todo with id of ' + request.params.id)
 });
 
 
@@ -117,24 +69,6 @@ app.post('/todos', function(request, response) {
 		response.status(400).json(e);
 	});
 
-	// call create on db.todo
-	// 		respond w 200 and todo
-	// 		e - response.json(400).send())
-
-	// if (!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0) { //test if body.
-	// 	return response.status(400).send(); //	completed and body.string, trim removes whitespaces
-	// }
-
-	// body.description = body.description.trim();
-
-	// // add id field unique id
-	// body.id = todoNextId++;
-
-	// //push body into array add unique id to post
-	// todos.push(body);
-
-	// // console.log('description: ' + body.description );
-	// response.json(body);
 });
 
 // DELETE /todos/:id
@@ -158,18 +92,7 @@ app.delete('/todos/:id', function(request, response) {
 	}, function() {
 		response.status(500).send();
 	});
-	// var matchedTodo = _.findWhere(todos, {
-	// 	id: todoId
-	// });
 
-	// if (!matchedTodo) {
-	// 	response.status(404).json({
-	// 		"error": "no todo found with that id"
-	// 	});
-	// } else {
-	// 	todos = _.without(todos, matchedTodo);
-	// 	response.json(matchedTodo);
-	// }
 
 });
 
@@ -209,6 +132,18 @@ app.put('/todos/:id', function(request, response) {
 		response.status(500).send(); //run if findbyid went wrong
 	});
 });
+
+
+app.post('/users',function (request,response) {
+	var body = _.pick(request.body, 'email','password');
+
+	db.user.create(body).then(function (user) {
+		response.json(user.toJSON());
+	}, function (e) {
+		response.status(400).json(e);
+	});
+});
+
 
 db.sequelize.sync().then(function() {
 	app.listen(PORT, function() {
