@@ -3,11 +3,13 @@ var bodyParser = require('body-parser');
 var _ = require('underscore');
 var db = require('./db.js');
 var bcrypt = require('bcrypt');
+var middleware = require('./middleware.js')(db);
 
 var app = express();
 var PORT = process.env.PORT || 3000;
 var todos = [];
 var todoNextId = 1; // to identify unique items, not secure, use database instead
+
 
 app.use(bodyParser.json()); // json request are parsed by express, able to access by request.body
 
@@ -17,7 +19,7 @@ app.get('/', function(request, response) {
 
 
 // GET /todos?completed=true&q=house
-app.get('/todos', function(request, response) {
+app.get('/todos',middleware.requireAuthentication, function(request, response) { // middleware executes before this function
 	var query = request.query; // allows key/value parameters /todos?key=value&anotherkey=value
 	var where = {};
 
@@ -45,7 +47,7 @@ app.get('/todos', function(request, response) {
 });
 
 // GET /todos/:id
-app.get('/todos/:id', function(request, response) { //:id whatever user puts in
+app.get('/todos/:id',middleware.requireAuthentication, function(request, response) { //:id whatever user puts in
 	var todoId = parseInt(request.params.id, 10); // store whatever user put in to use for  
 
 	db.todo.findById(todoId).then(function(todo) {
@@ -61,7 +63,7 @@ app.get('/todos/:id', function(request, response) { //:id whatever user puts in
 
 
 // POST /todos access data sent by request by using npmmodule bodyparser
-app.post('/todos', function(request, response) {
+app.post('/todos',middleware.requireAuthentication, function(request, response) {
 	var body = _.pick(request.body, 'description', 'completed'); //_.pick only allows certain key values to be taken from json
 
 	db.todo.create(body).then(function(todo) {
@@ -74,7 +76,7 @@ app.post('/todos', function(request, response) {
 
 // DELETE /todos/:id
 
-app.delete('/todos/:id', function(request, response) {
+app.delete('/todos/:id',middleware.requireAuthentication, function(request, response) {
 	var todoId = parseInt(request.params.id, 10);
 
 
@@ -98,7 +100,7 @@ app.delete('/todos/:id', function(request, response) {
 });
 
 // PUT /todos/:id
-app.put('/todos/:id', function(request, response) {
+app.put('/todos/:id',middleware.requireAuthentication, function(request, response) {
 	var todoId = parseInt(request.params.id, 10);
 	// var matchedTodo = _.findWhere(todos, {
 	// 	id: todoId
