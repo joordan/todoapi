@@ -168,25 +168,41 @@ app.post('/users',function (request,response) {
 // POST /users/login
 app.post('/users/login', function (request,response) {
 	var body = _.pick(request.body,'email','password');
+	var userInstance;
 
-
+	//run after authenticate finishes
 	db.user.authenticate(body).then(function (user) {
 		var token = user.generateToken('authentication');
+		userInstance = user;
+		// store token to db
+		return db.token.create({
+			token: token
+		});
 
-		if (token) {
-			response.header('Auth',token).json(user.toPublicJSON());
+		// if (token) {
+		// 	response.header('Auth',token).json(user.toPublicJSON());
 
-		} else {
-			response.status(401).send();
-		}
-	}, function () {
+		// } else {
+		// 	response.status(401).send();
+		// }
+	}).then(function (tokenInstance) {	// run after token.create
+		response.header('Auth',tokenInstance.get('token')).json(userInstance.toPublicJSON());
+	}).catch(function () {	// something goes wrong
 		response.status(401).send();
 	});
 
 
 });
 
-
+// DELETE /users/login
+app.delete('/users/login',middleware.requireAuthentication, function (request,response) {
+	//delete token instance
+	request.token.destroy().then(function () {
+		response.status(204).send();
+	}).catch(function() {
+		response.status(500).send();
+	});
+});
 
 db.sequelize.sync({force: true}).then(function() {
 	app.listen(PORT, function() {
