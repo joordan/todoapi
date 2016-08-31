@@ -67,7 +67,12 @@ app.post('/todos',middleware.requireAuthentication, function(request, response) 
 	var body = _.pick(request.body, 'description', 'completed'); //_.pick only allows certain key values to be taken from json
 
 	db.todo.create(body).then(function(todo) {
-		response.json(todo.toJSON());
+		//using middleware that handles assocation
+		request.user.addTodo(todo).then(function (){
+			return todo.reload(); // reload after assocation added
+		}).then(function (todo) {
+			response.json(todo.toJSON());
+		});
 	}, function(e) {
 		response.status(400).json(e);
 	});
